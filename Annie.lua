@@ -100,7 +100,7 @@ function Combo(OW)
     Control.CastSpell(HK_Q)
     end
     
-    if wTargets and Game.CanUseSpell(_W) == READY then
+    if wTargets and Game.CanUseSpell(_W) == READY and AnnieMenu.Combo.UseW:Value()then
       local CastPosition, Hitchance = _prediction:GetPrediction(wTargets,W)
         if Hitchance == "High" then
         Control.CastSpell(HK_W, CastPosition)
