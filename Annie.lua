@@ -97,20 +97,20 @@ function Combo(OW)
   local rTargets = Ts:GetTarget(R.Range)
   
   if qTarget and Game.CanUseSpell(_Q) == READY and AnnieMenu.Combo.UseQ:Value() then
-    Control.CastSpell(HK_Q)
+    Control.CastSpell(HK_Q,qTarget)
     end
     
     if wTargets and Game.CanUseSpell(_W) == READY and AnnieMenu.Combo.UseW:Value()then
       local CastPosition, Hitchance = _prediction:GetPrediction(wTargets,W)
         if Hitchance == "High" then
-        Control.CastSpell(HK_W, CastPosition)
+        SpellCast:CastSpell(HK_W, CastPosition)--extlib support cast skillshot
           end
      end
      
     if rTargets and Game.CanUseSpell(_R) and IsReady(_R) and AnnieMenu.Combo.UseR:Value() then
     local CastPosition, Hitchance = _prediction:GetPrediction(rTargets, R)
       if Hitchance == "High" then
-        Control.CastSpell(HK_R, CastPosition)
+        SpellCast:CastSpell(HK_R, CastPosition)
         end
      end
  end -- end function Combo
@@ -118,12 +118,10 @@ function Combo(OW)
  
 function LastHit(OW, Minions)
   local qTarget = Ts:GetTarget(Q.range)
-  for i, minion in pairs (Minions[1]) do
-    if minion and IsReady(_Q) and IsValidTarget(minion, 625, false, myHero.pos, minion)  then
-      local castPos = minion:GetPrediction(1500, 0.25)
-      DisableOrb(OW)
-      Control.CastSpell(HK_Q, castPos)
-      EnableOrb(OW)
+  for i, minion in pairs (Minions[1]) do--should check passive buff before lasthit
+    if minion and IsReady(_Q) and IsValidTarget(minion, 625, false, myHero.pos, minion) and getdmg("Q",minion,myHero) > minion.health  then
+      Control.CastSpell(HK_Q, minion)--Q is targeted spell, no need prediction here
+
     end
   end
 end
