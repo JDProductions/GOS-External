@@ -16,7 +16,6 @@ end
 local Q = {Delay = 0, Radius = 0, Range = 625, Speed = math.huge}
 local W = {Delay = 0, Radius = 0, Range = 625, Speed = math.huge}
 local R = {Delay = 0, Radius = 10, Range = 600, Speed = math.huge}
-local LastDmg = 0;
 local Ts = TargetSelector
 local _prediction = Prediction
 
@@ -26,6 +25,7 @@ local AnnieMenu = MenuElement({type = MENU, id = "AnnieMenu", name = "Doobies An
 AnnieMenu:MenuElement({type = MENU, id = "Combo", name = "Combo Settings"})
 AnnieMenu.Combo:MenuElement({id = "UseQ", name = "Use Q", value = true})
 AnnieMenu.Combo:MenuElement({id = "UseW", name = "Use W", value = true})
+AnnieMenu.Combo:MenuElement({id = "UseR", name = "Use R", value = true})
 
 -- Last Hit orbwalker menu
 AnnieMenu:MenuElement({type = MENU, id = "LastHit", name = "Last Hit Settings"})
@@ -33,23 +33,51 @@ AnnieMenu.LastHit:MenuElement({id = "UseQ", name = "Use Q", value = true})
 
 
 
+function IsValidTarget(unit, range, checkTeam, from)
+    local range = range == nil and math.huge or range
+    if unit == nil or not unit.valid or not unit.visible or unit.dead or not unit.isTargetable or IsImmune(unit) or (checkTeam and unit.isAlly) then 
+        return false 
+    end 
+    return unit.pos:DistanceTo(from) < range 
+end
+
+function IsImmune(unit)
+    for K, Buff in pairs(GetBuffs(unit)) do
+        if (Buff.name == "kindredrnodeathbuff" or Buff.name == "undyingrage") and GetPercentHP(unit) <= 10 then
+            return true
+        end
+        if Buff.name == "vladimirsanguinepool" or Buff.name == "judicatorintervention" or Buff.name == "zhonyasringshield" then 
+            return true
+        end
+    end
+    return false
+end
+
+function GetBuffs(unit)
+    T = {}
+    for i = 0, unit.buffCount do
+        local Buff = unit:GetBuff(i)
+        if Buff.count > 0 then
+            table.insert(T, Buff)
+        end
+    end
+    return T
+end
 
 
 OnActiveMode(function (OW, Minions)
   if OW.Mode == "Combo" then
     Combo(OW)
-	
-		elseif OW.Mode == "LastHit" then	
-		LastHit(OW,Minions)
-    end
- end
- )
+  elseif OW.Mode == "LastHit" then  
+    LastHit(OW,Minions)
+  end
+end)
  
- function IsReady(slot)
-    if  myHero:GetSpellData(slot).currentCd == 0 and myHero.mana > myHero:GetSpellData(slot).mana and myHero:GetSpellData(slot).level > 0 then
-        return true
-    end
-    return false
+function IsReady(slot)
+  if  myHero:GetSpellData(slot).currentCd == 0 and myHero.mana > myHero:GetSpellData(slot).mana and myHero:GetSpellData(slot).level > 0 then
+    return true
+  end
+  return false
 end
  
  
@@ -79,34 +107,23 @@ function Combo(OW)
           end
      end
      
-    if rTargets and Game.CanUseSpell(_R) == IsReady(_Q) and AnnieMenu.Combo.UseR:Value() then
+    if rTargets and Game.CanUseSpell(_R) and IsReady(_R) and AnnieMenu.Combo.UseR:Value() then
     local CastPosition, Hitchance = _prediction:GetPrediction(rTargets, R)
       if Hitchance == "High" then
         Control.CastSpell(HK_R, CastPosition)
         end
      end
  end -- end function Combo
+
  
-function LastHit(OW,Minions)
-    local qTarget = Ts:GetTarget(Q.Range)
-    for i, minion in pairs (Minions[1]) do
-        if IsReady(_Q) and ValidTarget(minion, Q.Range) then
-            if getdmg("Q", minion, myHero) > minion.health then
-                DisableOrb(OW)
-				Control.CastSpell(HK_Q)
-				EnableOrb(OW)
-            end
-        end
+function LastHit(OW, Minions)
+  local qTarget = Ts:GetTarget(Q.range)
+  for i, minion in pairs (Minions[1]) do
+    if minion and IsReady(_Q) and IsValidTarget(minion, 625, false, myHero.pos, minion)  then
+      local castPos = minion:GetPrediction(1500, 0.25)
+      DisableOrb(OW)
+      Control.CastSpell(HK_Q, castPos)
+      EnableOrb(OW)
     end
-end
- 
- function GetDamage(slot,unit)
-  if slot == _Q then
-    local dmg = ({80, 115, 150, 185})[myHero:GetSpellData(_Q).level] + 0.3 * myHero.ap
-    return CalcMagicalDamage(myHero,unit,dmg)
-  end
-  if slot == _R then
-    local dmg = ({250, 400, 550})[myHero:GetSpellData(_R).level] + 0.6 * myHero.ap 
-    return CalcMagicalDamage(myHero,unit,dmg)
   end
 end
