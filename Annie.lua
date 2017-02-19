@@ -33,28 +33,7 @@ AnnieMenu.LastHit:MenuElement({id = "UseQ", name = "Use Q", value = true})
 
 
 
-function CountEnemy(pos,range)
-  local N = 0
-  for i = 1,Game.HeroCount()  do
-    local hero = Game.Hero(i) 
-    if isValidTarget(hero,range) and hero.team ~= myHero.team then
-      N = N + 1
-    end
-  end
-  return N  
-end
 
-function OnTick()
-  if  isReady(_R) and os.clock() - LastDmg > 0.5 then -- crappy pc
-      LastDmg = os.clock()
-      for i = 1, Game.HeroCount()do
-        local hero = Game.Hero(i)
-        if hero.isEnemy and ValidTarget(hero) then
-          RDamages[hero.networkID] = GetDamage(_R, hero, myHero)
-          end
-       end
-    end
-end
 
 OnActiveMode(function (OW, Minions)
   if OW.Mode == "Combo" then
