@@ -16,11 +16,6 @@ end
 local Q = {Delay = 0, Radius = 0, Range = 625, Speed = math.huge}
 local W = {Delay = 0, Radius = 0, Range = 625, Speed = math.huge}
 local R = {Delay = 0, Radius = 10, Range = 600, Speed = math.huge}
-
-local PASSIVE_AMMO_MAX = GameObject.hudMaxAmmo
-local currentAmmo = GameObject.ammo
-IsPassiveReady = false
-
 local Ts = TargetSelector
 local _prediction = Prediction
 
@@ -31,7 +26,6 @@ AnnieMenu:MenuElement({type = MENU, id = "Combo", name = "Combo Settings"})
 AnnieMenu.Combo:MenuElement({id = "UseQ", name = "Use Q", value = true})
 AnnieMenu.Combo:MenuElement({id = "UseW", name = "Use W", value = true})
 AnnieMenu.Combo:MenuElement({id = "UseR", name = "Use R", value = true})
-
 
 -- Last Hit orbwalker menu
 AnnieMenu:MenuElement({type = MENU, id = "LastHit", name = "Last Hit Settings"})
@@ -70,21 +64,6 @@ function GetBuffs(unit)
     return T
 end
 
-function CheckForPassiveBuff()
-        if currentAmmo < PASSIVE_AMMO_MAX then
-            IsPassiveReady = false
-        end
-        elseif currentAmmo == PASSIVE_AMMO_MAX then
-            PrintChat("Annie Passive Is Ready")
-        end
-
-        -- if passive is true then set the value of last hit q farm to false
-
-end
-
-function ChargePassive() 
-    
-end
 
 OnActiveMode(function (OW, Minions)
   if OW.Mode == "Combo" then
@@ -117,8 +96,6 @@ function Combo(OW)
   local wTargets = Ts:GetTarget(W.Range)
   local rTargets = Ts:GetTarget(R.Range)
   
-    CheckForPassiveBuff()
-
   if qTarget and Game.CanUseSpell(_Q) == READY and AnnieMenu.Combo.UseQ:Value() then
     Control.CastSpell(HK_Q,qTarget)
     end
@@ -144,6 +121,7 @@ function LastHit(OW, Minions)
   for i, minion in pairs (Minions[1]) do--should check passive buff before lasthit
     if minion and IsReady(_Q) and IsValidTarget(minion, 625, false, myHero.pos, minion) and getdmg("Q",minion,myHero) > minion.health  then
       Control.CastSpell(HK_Q, minion)--Q is targeted spell, no need prediction here
+
     end
   end
 end
