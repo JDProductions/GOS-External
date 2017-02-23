@@ -31,7 +31,7 @@ AnnieMenu:MenuElement({type = MENU, id = "Combo", name = "Combo Settings"})
 AnnieMenu.Combo:MenuElement({id = "UseQ", name = "Use Q", value = true})
 AnnieMenu.Combo:MenuElement({id = "UseW", name = "Use W", value = true})
 AnnieMenu.Combo:MenuElement({id = "UseR", name = "Use R", value = true})
-AnnieMenu.Combo.MenuElement({id = "ChargePassive", name = "Passive" value = true})
+
 
 -- Last Hit orbwalker menu
 AnnieMenu:MenuElement({type = MENU, id = "LastHit", name = "Last Hit Settings"})
